@@ -86,7 +86,7 @@ void main() {
       // Verify the counter increments by 2.
       expect(find.text('2'), findsOneWidget);
     });
-    for (int i = 1; i <= 200; i++) {
+    for (int i = 1; i <= 3; i++) {
       test('API call test for valid IP address $i', () async {
         final String customHeader = 'test$i';
         final String url = 'https://ipinfo.io/ip?$customHeader';

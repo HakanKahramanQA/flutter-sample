@@ -9,12 +9,11 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('network logs flutter integration test', () {
-    for (int i = 1; i <= 10; i++) {
+    for (int i = 1; i <= 200; i++) {
     testWidgets('API call test for valid IP address $i',
             (tester) async {
           app.main();
           await tester.pumpAndSettle();
-
           final String customHeader = 'test$i';
           final String url = 'https://ipinfo.io/ip?$customHeader';
           final response = await http.get(

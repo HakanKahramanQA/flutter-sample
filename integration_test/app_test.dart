@@ -21,7 +21,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
   group('HTTP network logs flutter integration test', () {
-    for (int i = 1; i <= 10; i++) {
+    for (int i = 1; i <= 200; i++) {
       testWidgets('API call test for valid IP address $i', (tester) async {
         app.main();
         await tester.pumpAndSettle();

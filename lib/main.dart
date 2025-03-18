@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:logger/logger.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -49,6 +52,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String _location = "Location not available";
 
   void _incrementCounter() {
     setState(() {
@@ -64,38 +68,73 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+
+
+  final Logger logger = Logger();
+
+
+  Future<void> _getCurrentLocation() async {
+    logger.i('Attempting to get current location');
+
+    // First check if location services are enabled
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      logger.e('Location services are disabled');
+      setState(() {
+        _location = 'Error: Location services disabled';
+      });
+      return;
+    }
+
+    // Check permissions
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        logger.e('Location permissions denied');
+        setState(() {
+          _location = 'Error: Location permission denied';
+        });
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      logger.e('Location permissions permanently denied');
+      setState(() {
+        _location = 'Error: Location permissions permanently denied. Please enable in settings.';
+      });
+      return;
+    }
+
+    // Now try to get the location with timeout and specific accuracy
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 15)
+      );
+
+      logger.i('Current location retrieved: ${position.latitude}, ${position.longitude}');
+      setState(() {
+        _location = 'Lat: ${position.latitude}, Lon: ${position.longitude}';
+      });
+    } catch (e) {
+      logger.e('Error retrieving location: $e');
+      setState(() {
+        _location = 'Error: $e';
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
@@ -105,14 +144,38 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            const SizedBox(height: 20),
+            Text(
+              'Current Location:',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            Text(
+              _location,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomRight,
+            child: FloatingActionButton(
+              onPressed: _incrementCounter,
+              tooltip: 'Increment',
+              child: const Icon(Icons.add),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: FloatingActionButton(
+              onPressed: _getCurrentLocation,
+              tooltip: 'GPS',
+              child: const Text('GPS'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

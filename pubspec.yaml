@@ -43,6 +43,8 @@ dependencies:
     git:
       url: https://github.com/LambdaTest/flutter_system_proxy.git
       ref: main
+  geolocator: ^7.7.1
+  logger: ^1.1.0
 #      ref: main
 #  dio: ^5.5.0+1
 

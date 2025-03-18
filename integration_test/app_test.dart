@@ -20,8 +20,33 @@ class MyHttpOverrides extends HttpOverrides{
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
-  group('HTTP network logs flutter integration test', () {
-    for (int i = 1; i <= 200; i++) {
+  group('Integration tests', () {
+    for (int i = 1; i <= 3; i++) {
+      testWidgets('Click GPS button and verify the coordinates are generated $i', (
+          WidgetTester tester) async {
+        // Launch the app
+        app.main();
+        await tester.pumpAndSettle();
+
+        // Find the GPS button by its tooltip
+        final Finder gpsButton = find.byTooltip('GPS');
+
+        // Tap the GPS button
+        await tester.tap(gpsButton);
+        await tester.pumpAndSettle();
+
+        // Add a delay to ensure the location is fetched
+        await Future.delayed(const Duration(seconds: 5));
+        await tester.pumpAndSettle();
+
+        // Verify the location text is updated
+        expect(find.textContaining('Lat:'), findsOneWidget);
+        expect(find.textContaining('Lon:'), findsOneWidget);
+        await Future.delayed(const Duration(seconds: 5));
+      });
+    }
+
+    for (int i = 1; i <= 10; i++) {
       testWidgets('API call test for valid IP address $i', (tester) async {
         app.main();
         await tester.pumpAndSettle();

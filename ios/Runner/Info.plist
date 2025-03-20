@@ -5,7 +5,9 @@
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>We need your location to provide better services.</string>
     <key>NSLocationAlwaysUsageDescription</key>
-    <string>We need your location to provide better services even when the app is in background.</string>
+    <string>We need your location to provide better services.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>We need your location to provide better services.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
